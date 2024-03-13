@@ -1,12 +1,14 @@
 import Header from '@/app/components/Header';
+import Toc from '@/app/components/Toc';
+import { slugify } from '@/app/utils/helpers';
 import { Post } from '@/app/utils/interface';
 import { client } from '@/sanity/lib/client';
 import { urlForImage } from '@/sanity/lib/image';
 import { PortableText } from '@portabletext/react';
 import { VT323 } from 'next/font/google';
 import Image from 'next/image';
-import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 
 interface Params {
   params: {
@@ -24,6 +26,7 @@ async function getPost(slug: string) {
       publishedAt,
       excerpt,
       _id,
+      "headings": body[style in ["h2","h3","h4","h5","h6"]],
       body,
       tags[]-> {
         _id,
@@ -40,6 +43,7 @@ export const revalidate = 60;
 
 const page = async ({ params }: Params) => {
   const post: Post = await getPost(params.slug);
+  console.log('🚀 ~ page ~ Post:', post.headings);
 
   if (!post) {
     notFound();
@@ -61,6 +65,7 @@ const page = async ({ params }: Params) => {
             </Link>
           ))}
         </div>
+        <Toc headings={post?.headings} />
         <div className={richTextStyles}>
           <PortableText
             value={post?.body}
@@ -83,6 +88,48 @@ const myPortableTextComponents = {
         width={700}
         height={700}
       />
+    ),
+  },
+  block: {
+    h2: ({ value }: any) => (
+      <h2
+        id={slugify(value.children[0].text)}
+        className='text-3xl font-bold mb-3'
+      >
+        {value.children[0].text}
+      </h2>
+    ),
+    h3: ({ value }: any) => (
+      <h3
+        id={slugify(value.children[0].text)}
+        className='text-3xl font-bold mb-3'
+      >
+        {value.children[0].text}
+      </h3>
+    ),
+    h4: ({ value }: any) => (
+      <h4
+        id={slugify(value.children[0].text)}
+        className='text-3xl font-bold mb-3'
+      >
+        {value.children[0].text}
+      </h4>
+    ),
+    h5: ({ value }: any) => (
+      <h5
+        id={slugify(value.children[0].text)}
+        className='text-3xl font-bold mb-3'
+      >
+        {value.children[0].text}
+      </h5>
+    ),
+    h6: ({ value }: any) => (
+      <h6
+        id={slugify(value.children[0].text)}
+        className='text-3xl font-bold mb-3'
+      >
+        {value.children[0].text}
+      </h6>
     ),
   },
 };
